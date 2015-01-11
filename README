@@ -1,0 +1,1 @@
+Usage: ./classGenerator name -private <privates attribute> -protected <protected attribute> -public <publics attribute>
