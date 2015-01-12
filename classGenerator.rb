@@ -127,6 +127,20 @@ File.open(name + ".class.hpp", 'w') do |f|
   f.write "public:\n"
   if publics
     publics.each do |hash|
+        f.write "\t#{hash[0]}\t\t\t#{hash[1]};\n"
+    end
+  end
+
+  if privates
+    f.write "private:\n"
+    privates.each do |hash|
+      f.write "\t#{hash[0]}\t\t\t#{hash[1]};\n"
+    end
+  end
+
+  if protecteds
+    f.write "protected:\n"
+    protecteds.each do |hash|
       f.write "\t#{hash[0]}\t\t\t#{hash[1]};\n"
     end
   end
@@ -165,6 +179,6 @@ File.open(name + ".class.cpp", 'w') do |f|
   f.write "\n#{name}::~#{name}(void) {\n\n}\n\n"
 
   operatorComment f
-  f.write "\n#{name} const\t\t\t&#{name}::operator=(#{name} const & rhs) {\n\nr\treturn (*this);\n}\n"
+  f.write "\n#{name} const\t\t\t&#{name}::operator=(#{name} const & rhs) {\n\n\treturn (*this);\n}\n"
 
 end
