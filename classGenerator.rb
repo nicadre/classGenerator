@@ -113,34 +113,28 @@ File.open(name + ".class.hpp", 'w') do |f|
   f.write "# define\t#{name.upcase}_CLASS_HPP\n\n"
 
   f.write "class #{name} {\n"
-  #  f.write "private:\n"
-  #  f.write "\ttest;\n\n"
 
   privates = getPrivate ARGV
   protecteds = getProtected ARGV
   publics = getPublic ARGV
 
-  puts privates
-  puts protecteds
-  puts publics
-
-  f.write "public:\n"
-  if publics
-    publics.each do |hash|
-        f.write "\t#{hash[0]}\t\t\t#{hash[1]};\n"
-    end
-  end
-
   if privates
     f.write "private:\n"
     privates.each do |hash|
-      f.write "\t#{hash[0]}\t\t\t#{hash[1]};\n"
+      f.write "\t#{hash[0]}\t\t\t_#{hash[1]};\n"
     end
   end
 
   if protecteds
     f.write "protected:\n"
     protecteds.each do |hash|
+      f.write "\t#{hash[0]}\t\t\t_#{hash[1]};\n"
+    end
+  end
+
+  f.write "public:\n"
+  if publics
+    publics.each do |hash|
       f.write "\t#{hash[0]}\t\t\t#{hash[1]};\n"
     end
   end
@@ -154,10 +148,6 @@ File.open(name + ".class.hpp", 'w') do |f|
 
   operatorComment f
   f.write "\t#{name} const\t\t\t&operator=(#{name} const & rhs);\n\n"
-
-  f.write "private:\n" if privates
-
-  f.write "protected:\n" if protecteds
 
   f.write "};\n\n"
   f.write "#endif //\t#{name.upcase}_CLASS_HPP\n"
