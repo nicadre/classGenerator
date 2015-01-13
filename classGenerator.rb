@@ -161,6 +161,7 @@ def getException(args)
     ary << args[i]
     i += 1
   end
+  ary
 end
 
 name = ARGV[0]
@@ -241,8 +242,19 @@ File.open(name + ".class.hpp", 'w') do |f|
     end
   end
 
-  exceptionComment f
-  puts exceptions if exceptions
+  if exceptions
+    exceptionComment f
+    exceptions.each do |hash|
+      f.write "\tclass #{hash} : public std::exception {\n"
+      f.write "\tpublic:\n"
+      f.write "\t\t#{hash}(void);\n"
+      f.write "\t\t#{hash}(#{hash} const &src);\n"
+      f.write "\t\tvirtual ~#{hash}(void) throw();\n"
+      f.write "\t\t#{hash}\t\t&operator=(#{hash} const & rhs);\n"
+      f.write "\t\tvirtual const char\t\t*what() const throw();\n"
+      f.write "\t};\n\n"
+    end
+  end
 
   f.write "};\n\n"
   f.write "#endif //\t#{name.upcase}_CLASS_HPP\n"
@@ -288,6 +300,17 @@ File.open(name + ".class.cpp", 'w') do |f|
     protecteds.each do |hash|
       f.write "void\t\t\t#{name}::set#{hash[1].capitalize}(#{hash[0]} #{hash[1]}) {\n\tthis->_#{hash[1]} = #{hash[1]}\n}\n"
     end
+  end
+  
+  if exceptions
+      exceptionComment f
+      exceptions.each do |hash|
+          f.write "#{name}::#{hash}::#{hash}(void) {}\n\n"
+          f.write "#{name}::#{hash}::#{hash}(#{hash} const &src) : std::exception(src) {}\n\n"
+          f.write "#{name}::#{hash}::~#{hash}(void) throw() {}\n\n"
+          f.write "#{name}::#{hash} & #{name}::#{hash}::operator=(#{hash} const & rhs) {\n\tstd::exception::operator=(rhs);\n}\n\n"
+          f.write "const char * #{name}::#{hash}::what() const throw() {\n\treturn(\"\");\n}\n"
+      end
   end
 
 end
