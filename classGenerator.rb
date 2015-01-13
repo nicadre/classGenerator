@@ -7,7 +7,7 @@
 #    By: niccheva <niccheva@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2015/01/10 23:06:54 by niccheva          #+#    #+#              #
-#    Updated: 2015/01/13 08:01:57 by niccheva         ###   ########.fr        #
+#    Updated: 2015/01/13 08:21:56 by niccheva         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -73,6 +73,19 @@ def setterComment(f)
   f.write " */\n"
 end
 
+def exceptionComment(f)
+  f.write "/* "
+
+  30.times do
+    f.write "*"
+  end
+  f.write " Exceptions "
+  31.times do
+    f.write "*"
+  end
+  f.write " */\n"
+end
+
 def getPrivate(args)
   i = 0;
   ary = Array.new
@@ -122,9 +135,32 @@ def getPublic(args)
   ary
 end
 
+def getInherit(args)
+  i = 0
+  while (i < args.length && args[i] != "-inherit") do
+    i += 1
+  end
+  return nil unless i < args.length
+  args[i + 1]
+end
+
 if ARGV.length == 0
   puts "Please read README file for usage"
   exit
+end
+
+def getException(args)
+  i = 0
+  ary = Array.new
+  while (i < args.length && args[i] != "-exception") do
+   i += 1
+  end
+  return nil unless i < args.length
+  i += 1
+  until i >= args.length || args[i] == "-protected" || args[i] == "-private" || args[i] == "-public" || args[i] == "-inherit" do
+    ary << args[i]
+    i += 1
+  end
 end
 
 name = ARGV[0]
@@ -137,12 +173,18 @@ end
 privates = getPrivate ARGV
 protecteds = getProtected ARGV
 publics = getPublic ARGV
+inherit = getInherit ARGV
+exceptions = getException ARGV
 
 File.open(name + ".class.hpp", 'w') do |f|
   f.write "\n#ifndef\t\t#{name.upcase}_CLASS_HPP\n"
   f.write "# define\t#{name.upcase}_CLASS_HPP\n\n"
 
-  f.write "class #{name} {\n"
+  f.write "# include \"#{inherit}.class.hpp\"\n" if inherit
+  f.write "# include <stdexcept>\n" if exceptions
+
+  f.write "class #{name} {\n" unless inherit
+  f.write "class #{name} : public #{inherit} {\n" if inherit
 
   if privates
     f.write "private:\n"
@@ -198,6 +240,9 @@ File.open(name + ".class.hpp", 'w') do |f|
       f.write "\tvoid\t\t\t#{name}::set#{hash[1].capitalize}(#{hash[0]} #{hash[1]});\n"
     end
   end
+
+  exceptionComment f
+  puts exceptions if exceptions
 
   f.write "};\n\n"
   f.write "#endif //\t#{name.upcase}_CLASS_HPP\n"

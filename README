@@ -1,1 +1,1 @@
-Usage: ./classGenerator name -private <privates attribute> -protected <protected attribute> -public <publics attribute>
+Usage: ./classGenerator name -inherit <single inheritance class> -private <privates attribute> -protected <protected attribute> -public <publics attribute>
