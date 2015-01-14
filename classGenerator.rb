@@ -7,7 +7,7 @@
 #    By: niccheva <niccheva@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2015/01/10 23:06:54 by niccheva          #+#    #+#              #
-#    Updated: 2015/01/13 08:21:56 by niccheva         ###   ########.fr        #
+     Updated: 2015/01/14 10:34:50 by niccheva         ###   ########.fr         
 #                                                                              #
 # **************************************************************************** #
 
@@ -213,7 +213,7 @@ File.open(name + ".class.hpp", 'w') do |f|
   f.write "\t#{name}(#{name} const & src);\n\n"
 
   destructorComment f
-  f.write "\t~#{name}(void);\n\n"
+  f.write "\tvirtual ~#{name}(void);\n\n"
 
   operatorComment f
   f.write "\t#{name} const\t\t\t&operator=(#{name} const & rhs);\n\n"
