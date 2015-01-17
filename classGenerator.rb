@@ -7,7 +7,7 @@
 #    By: niccheva <niccheva@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2015/01/10 23:06:54 by niccheva          #+#    #+#              #
-     Updated: 2015/01/14 10:34:50 by niccheva         ###   ########.fr         
+#    Updated: 2015/01/17 22:09:33 by niccheva         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -221,24 +221,24 @@ File.open(name + ".class.hpp", 'w') do |f|
   getterComment f
   if privates
     privates.each do |hash|
-      f.write "\t#{hash[0]}\t\t\t#{name}::get#{hash[1].capitalize}(void) const;\n"
+      f.write "\t#{hash[0]}\t\t\tget#{hash[1].capitalize}(void) const;\n"
     end
   end
   if protecteds
     protecteds.each do |hash|
-      f.write "\t#{hash[0]}\t\t\t#{name}::get#{hash[1].capitalize}(void) const;\n"
+      f.write "\t#{hash[0]}\t\t\tget#{hash[1].capitalize}(void) const;\n"
     end
   end
 
   setterComment f
   if privates
     privates.each do |hash|
-      f.write "\tvoid\t\t\t#{name}::set#{hash[1].capitalize}(#{hash[0]} #{hash[1]});\n"
+      f.write "\tvoid\t\t\tset#{hash[1].capitalize}(#{hash[0]} #{hash[1]});\n"
     end
   end
   if protecteds
     protecteds.each do |hash|
-      f.write "\tvoid\t\t\t#{name}::set#{hash[1].capitalize}(#{hash[0]} #{hash[1]});\n"
+      f.write "\tvoid\t\t\tset#{hash[1].capitalize}(#{hash[0]} #{hash[1]});\n"
     end
   end
 
@@ -301,7 +301,7 @@ File.open(name + ".class.cpp", 'w') do |f|
       f.write "void\t\t\t#{name}::set#{hash[1].capitalize}(#{hash[0]} #{hash[1]}) {\n\tthis->_#{hash[1]} = #{hash[1]}\n}\n"
     end
   end
-  
+
   if exceptions
       exceptionComment f
       exceptions.each do |hash|
@@ -312,5 +312,4 @@ File.open(name + ".class.cpp", 'w') do |f|
           f.write "const char * #{name}::#{hash}::what() const throw() {\n\treturn(\"\");\n}\n"
       end
   end
-
 end
