@@ -7,7 +7,7 @@
 #    By: niccheva <niccheva@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2015/01/10 23:06:54 by niccheva          #+#    #+#              #
-#    Updated: 2015/03/20 18:24:00 by niccheva         ###   ########.fr        #
+#    Updated: 2015/04/09 16:31:33 by niccheva         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -144,11 +144,6 @@ def getInherit(args)
   args[i + 1]
 end
 
-if ARGV.length == 0
-  puts "Please read README file for usage"
-  exit
-end
-
 def getException(args)
   i = 0
   ary = Array.new
@@ -162,6 +157,11 @@ def getException(args)
     i += 1
   end
   ary
+end
+
+if ARGV.length == 0
+  puts "Please read README file for usage"
+  exit
 end
 
 name = ARGV[0]
@@ -178,10 +178,11 @@ inherit = getInherit ARGV
 exceptions = getException ARGV
 
 File.open(name + ".class.hpp", 'w') do |f|
-  f.write "\n#ifndef\t\t#{name.upcase}_CLASS_HPP\n"
+  f.write "#ifndef\t\t#{name.upcase}_CLASS_HPP\n"
   f.write "# define\t#{name.upcase}_CLASS_HPP\n\n"
 
   f.write "# include \"#{inherit}.class.hpp\"\n" if inherit
+  f.write "# include <iostream>\n" if ARGV.include?("std::string")
   f.write "# include <stdexcept>\n" if exceptions
 
   f.write "class #{name} {\n" unless inherit
@@ -208,42 +209,42 @@ File.open(name + ".class.hpp", 'w') do |f|
     end
   end
 
-  constructorComment f
+  constructorComment f if ARGV.include? "-comment"
   f.write "\t#{name}(void);\n"
   f.write "\t#{name}(#{name} const & src);\n\n"
 
-  destructorComment f
+  destructorComment f if ARGV.include? "-comment"
   f.write "\tvirtual ~#{name}(void);\n\n"
 
-  operatorComment f
+  operatorComment f if ARGV.include? "-comment"
   f.write "\t#{name} const\t\t\t&operator=(#{name} const & rhs);\n\n"
 
-  getterComment f
-  if privates
+  getterComment f if ARGV.include? "-comment" && ARGV.include?("-g") && privates || protecteds
+  if privates && ARGV.include?("-g")
     privates.each do |hash|
       f.write "\t#{hash[0]}\t\t\t#{hash[1]}(void) const;\n"
     end
   end
-  if protecteds
+  if protecteds && ARGV.include?("-g")
     protecteds.each do |hash|
       f.write "\t#{hash[0]}\t\t\t#{hash[1]}(void) const;\n"
     end
   end
 
-  setterComment f
-  if privates
+  setterComment f if ARGV.include? "-comment" && ARGV.include?("-s") && privates || protecteds
+  if privates && ARGV.include?("-s")
     privates.each do |hash|
-      f.write "\tvoid\t\t\tset#{hash[1].capitalize}(#{hash[0]} #{hash[1]});\n"
+      f.write "\tvoid\t\t\t#{hash[1]}(#{hash[0]} #{hash[1]});\n"
     end
   end
-  if protecteds
+  if protecteds && ARGV.include?("-s")
     protecteds.each do |hash|
-      f.write "\tvoid\t\t\tset#{hash[1].capitalize}(#{hash[0]} #{hash[1]});\n"
+      f.write "\tvoid\t\t\t#{hash[1]}(#{hash[0]} #{hash[1]});\n"
     end
   end
 
   if exceptions
-    exceptionComment f
+    exceptionComment f if ARGV.include? "-comment"
     exceptions.each do |hash|
       f.write "\tclass #{hash} : public std::exception {\n"
       f.write "\tpublic:\n"
@@ -268,42 +269,42 @@ end
 File.open(name + ".class.cpp", 'w') do |f|
   f.write "\n#include \"#{name}.class.hpp\"\n\n"
 
-  constructorComment f
+  constructorComment f if ARGV.include? "-comment"
   f.write "\n#{name}::#{name}(void) {\n\n}\n\n"
   f.write "#{name}::#{name}(#{name} const & src) {\n\t*this = src;\n}\n\n"
 
-  destructorComment f
+  destructorComment f if ARGV.include? "-comment"
   f.write "\n#{name}::~#{name}(void) {\n\n}\n\n"
 
-  operatorComment f
+  operatorComment f if ARGV.include? "-comment"
   f.write "\n#{name} const\t\t\t&#{name}::operator=(#{name} const & rhs) {\n\n\treturn (*this);\n}\n"
 
-  getterComment f
-  if protecteds
+  getterComment f if ARGV.include? "-comment" && ARGV.include?("-g") && privates || protecteds
+  if protecteds && ARGV.include?("-g")
     protecteds.each do |hash|
-      f.write "#{hash[0]}\t\t\t#{name}::#{hash[1]}(void) const {\n\treturn (this->_#{hash[1]});\n}\n"
+      f.write "#{hash[0]}\t\t\t#{name}::#{hash[1]}(void) const { return (this->_#{hash[1]}); }\n"
     end
   end
-  if privates
+  if privates && ARGV.include?("-g")
     privates.each do |hash|
-      f.write "#{hash[0]}\t\t\t#{name}::#{hash[1]}(void) const {\n\treturn (this->_#{hash[1]});\n}\n"
+      f.write "#{hash[0]}\t\t\t#{name}::#{hash[1]}(void) const { return (this->_#{hash[1]}); }\n"
     end
   end
 
-  setterComment f
-  if privates
+  setterComment f if ARGV.include? "-comment" && ARGV.include?("-s") && privates || protecteds
+  if privates && ARGV.include?("-s")
     privates.each do |hash|
-      f.write "void\t\t\t#{name}::set#{hash[1].capitalize}(#{hash[0]} #{hash[1]}) {\n\tthis->_#{hash[1]} = #{hash[1]}\n}\n"
+      f.write "void\t\t\t#{name}::#{hash[1]}(#{hash[0]} #{hash[1]}) { this->_#{hash[1]} = #{hash[1]}; }\n"
     end
   end
-  if protecteds
+  if protecteds && ARGV.include?("-s")
     protecteds.each do |hash|
-      f.write "void\t\t\t#{name}::set#{hash[1].capitalize}(#{hash[0]} #{hash[1]}) {\n\tthis->_#{hash[1]} = #{hash[1]}\n}\n"
+      f.write "void\t\t\t#{name}::#{hash[1]}(#{hash[0]} #{hash[1]}) { this->_#{hash[1]} = #{hash[1]}; }\n"
     end
   end
 
   if exceptions
-      exceptionComment f
+      exceptionComment f if ARGV.include? "-comment"
       exceptions.each do |hash|
           f.write "#{name}::#{hash}::#{hash}(void) {}\n\n"
           f.write "#{name}::#{hash}::#{hash}(#{hash} const &src) : std::exception(src) {}\n\n"
